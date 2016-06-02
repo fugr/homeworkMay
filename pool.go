@@ -5,11 +5,6 @@ import (
 	"unsafe"
 )
 
-const (
-	cap  = 1 << 10
-	size = 1<<5 + 7
-)
-
 var ErrPoolEmpty = errors.New("empty pool")
 
 type Cache interface {
@@ -22,29 +17,32 @@ type Cache interface {
 
 type Pool struct {
 	head  unsafe.Pointer
-	pools [cap]int
+	pools []byte
 }
 
 type list struct {
 	next unsafe.Pointer
 }
 
-func NewPool(c Cache) *Pool {
-	p := new(Pool)
+func NewPool(c Cache, cap int) *Pool {
+	p := &Pool{
+		pools: make([]byte, cap),
+	}
 
 	p.head = unsafe.Pointer(&p.pools[0])
 	size := c.Sizeof()
 
-	for i := 0; ; i += size {
+	for i, cap := 0, len(p.pools); ; {
 		current := (*list)(unsafe.Pointer(&p.pools[i]))
 		next := i + size
 
-		if next < len(p.pools) {
+		if next < cap {
 			current.next = unsafe.Pointer(&p.pools[next])
 		} else {
 			current.next = nil
 			break
 		}
+		i = next
 	}
 
 	return p
@@ -72,6 +70,8 @@ func (p *Pool) Put(c Cache) {
 	node := (*list)(pointer)
 	node.next = head
 }
+
+const size = 1<<4 + 7
 
 type Ints [size]int
 

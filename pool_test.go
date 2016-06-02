@@ -8,7 +8,7 @@ import (
 func testCachePool(c Cache, convert func(unsafe.Pointer) Cache, t *testing.T) {
 	var (
 		first, last unsafe.Pointer
-		pool        = NewPool(c)
+		pool        = NewPool(c, 1<<11)
 	)
 	for {
 		pointer, err := pool.Get()
@@ -92,8 +92,8 @@ func TestComposite(t *testing.T) {
 		}
 	}
 
-	if sizeof := c.Sizeof(); sizeof != 384 {
-		t.Errorf("Sizeof:want %d got %d", sizeof, 384)
+	if sizeof := c.Sizeof(); sizeof != 256 {
+		t.Errorf("Sizeof:want %d got %d", 256, sizeof)
 	}
 
 	testCachePool(&c,

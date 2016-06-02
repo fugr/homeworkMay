@@ -27,6 +27,9 @@ func TestQueue(t *testing.T) {
 		if err != nil {
 			t.Error(i, err)
 		}
+		if i != dat {
+			t.Error("want %d got %d", i, dat)
+		}
 		t.Log(i, dat)
 	}
 
@@ -35,16 +38,6 @@ func TestQueue(t *testing.T) {
 		t.Errorf("pop empty queue should with error:%s", ErrQueueEmpty)
 	}
 
-	if err = q.Push(11); err != nil {
-		t.Error(err)
-	}
-
-	if err = q.Push(12); err != nil {
-		t.Error(err)
-	}
-
-	t.Log(q.Pop())
-	t.Log(q.Pop())
 }
 
 func TestConcurrencyQueue(t *testing.T) {
