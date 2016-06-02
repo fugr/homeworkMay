@@ -48,7 +48,7 @@ func NewPool(c Cache, cap int) *Pool {
 	return p
 }
 
-func (p *Pool) Get() (unsafe.Pointer, error) {
+func (p *Pool) Get(convert func(unsafe.Pointer) Cache) (Cache, error) {
 	if p.head == nil {
 		return nil, ErrPoolEmpty
 	}
@@ -58,7 +58,7 @@ func (p *Pool) Get() (unsafe.Pointer, error) {
 	node := (*list)(ptr)
 	p.head = node.next
 
-	return ptr, nil
+	return convert(ptr), nil
 }
 
 func (p *Pool) Put(c Cache) {
@@ -72,6 +72,16 @@ func (p *Pool) Put(c Cache) {
 }
 
 const size = 1<<4 + 7
+
+var (
+	IntsConvert = func(ptr unsafe.Pointer) Cache {
+		return (*Ints)(ptr)
+	}
+
+	CompositeConvert = func(ptr unsafe.Pointer) Cache {
+		return (*Composite)(ptr)
+	}
+)
 
 type Ints [size]int
 

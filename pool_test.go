@@ -11,33 +11,34 @@ func testCachePool(c Cache, convert func(unsafe.Pointer) Cache, t *testing.T) {
 		pool        = NewPool(c, 1<<11)
 	)
 	for {
-		pointer, err := pool.Get()
+		c1, err := pool.Get(convert)
 		if err != nil {
 			t.Log(err)
 			break
 		}
-		t.Logf("%p", pointer)
 
-		first = unsafe.Pointer(pointer)
+		first = c1.Pointer()
+		t.Logf("%p", first)
+
 		if last != nil && first != last {
 			t.Errorf("Unexpected,address from pool isnot the last one,%p!=%p", first, last)
 		}
 
-		pointer1, err := pool.Get()
+		c2, err := pool.Get(convert)
 		if err != nil {
 			t.Log(err)
 			break
 		}
-		t.Logf("%p", pointer1)
-		last = unsafe.Pointer(pointer1)
+
+		last = c2.Pointer()
+		t.Logf("%p", last)
 
 		if first == last {
 			t.Errorf("Unexpected,got same address from pool,%p==%p", first, last)
 		}
 
-		// put back last address to pool
-		cache := convert(last)
-		pool.Put(cache)
+		// put back last to pool
+		pool.Put(c2)
 	}
 }
 
@@ -57,11 +58,7 @@ func TestInts(t *testing.T) {
 		t.Errorf("Sizeof:want %d got %d", sizeof, len(a)*8)
 	}
 
-	testCachePool(&a,
-		func(ptr unsafe.Pointer) Cache {
-			return (*Ints)(ptr)
-		},
-		t)
+	testCachePool(&a, IntsConvert, t)
 }
 
 func TestComposite(t *testing.T) {
@@ -96,9 +93,5 @@ func TestComposite(t *testing.T) {
 		t.Errorf("Sizeof:want %d got %d", 256, sizeof)
 	}
 
-	testCachePool(&c,
-		func(ptr unsafe.Pointer) Cache {
-			return (*Composite)(ptr)
-		},
-		t)
+	testCachePool(&c, CompositeConvert, t)
 }
