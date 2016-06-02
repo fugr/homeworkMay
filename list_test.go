@@ -21,7 +21,7 @@ func TestList(t *testing.T) {
 	list.Insert(30)
 	list.Insert(20)
 
-	got := list.String()
+	got := list.String(false)
 	if got != "head -->3<-->5<-->7<-->8<-->11<-->12<-->19<-->20<-->30<-->33<-- tail" {
 		t.Errorf("Insert error,got:'%s'", got)
 	}
@@ -47,7 +47,7 @@ func TestList(t *testing.T) {
 		t.Error("Unexpected,want %s got %s", ErrNodeNotFound, err)
 	}
 
-	got = list.String()
+	got = list.String(false)
 	if got != "head -->3<-->7<-->8<-->12<-->19<-->20<-->30<-- tail" {
 		t.Errorf("Insert error,got:'%s'", got)
 	}
@@ -65,5 +65,10 @@ func TestList(t *testing.T) {
 	if err != ErrNodeNotFound {
 		t.Error("Unexpected,want %s got %s", ErrNodeNotFound, err)
 	}
-	t.Log(list.String())
+
+	got = list.String(true)
+	if got != "tail -->30<-->20<-->19<-->12<-->8<-->7<-->3<-- head" {
+		t.Errorf("Insert error,got:'%s'", got)
+	}
+	t.Log(got)
 }

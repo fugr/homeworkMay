@@ -114,19 +114,34 @@ func (l *List) Search(id int) (*Node, error) {
 	return nil, ErrNodeNotFound
 }
 
-func (l *List) String() string {
-	if l.head == nil {
-		return "head -->nil<-- tail"
+func (l List) String(reverse bool) string {
+	if !reverse {
+		if l.head == nil {
+			return "head -->nil<-- tail"
+		}
+		s := "head"
+		for next := l.head; next != nil; next = next.Next {
+			if next.Prev == nil {
+				s += fmt.Sprintf(" -->%d", next.id)
+			} else {
+				s += fmt.Sprintf("<-->%d", next.id)
+			}
+		}
+		return s + "<-- tail"
 	}
-	s := "head"
-	for next := l.head; next != nil; next = next.Next {
-		if next.Prev == nil {
-			s += fmt.Sprintf(" -->%d", next.id)
+
+	// reverse
+	if l.tail == nil {
+		return "tail -->nil<-- head"
+	}
+	s := "tail"
+	for prev := l.tail; prev != nil; prev = prev.Prev {
+		if prev.Next == nil {
+			s += fmt.Sprintf(" -->%d", prev.id)
 		} else {
-			s += fmt.Sprintf("<-->%d", next.id)
+			s += fmt.Sprintf("<-->%d", prev.id)
 		}
 	}
-	s += "<-- tail"
 
-	return s
+	return s + "<-- head"
 }
